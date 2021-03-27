@@ -1,0 +1,59 @@
+- hosts: all
+  tasks:
+          - name: yum_docker
+            yum_repository:
+                    name: Docker
+                    description: "Docker repo configuration"
+                    baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"
+                    gpgcheck: no
+
+
+          - name: "install docker"
+            command: "yum install docker-ce --nobest -y"
+
+          - name: "Install python"
+            package:
+                    name: python36
+                    state: present
+
+          - name: "Install SDK of docker for python"
+            command: pip3 install docker
+                   
+          - name: "Start and enable docker services"
+            service:
+                    name: "docker"
+                    state: started
+                    enabled: yes
+
+
+          - name: "Pull docker image"
+            docker_image:
+                    name: httpd
+                    source: pull
+
+          - name: create destination folder
+            file:
+                    path: /DockerAnsible
+                    state: directory
+
+          - name: "copy pages"
+            copy:
+                    src: "/index.html"
+                    dest: "/DockerAnsible"
+
+          - name: "Create container"
+            docker_container:
+                    name: mywebserver1
+                    image: httpd
+                    state: started
+                    exposed_ports:
+                            - "80"
+                    ports: 
+                            - "8080:80"
+
+                    volumes: /DockerAnsible:/usr/local/apache2/htdocs/
+
+        
+         
+         
+            
